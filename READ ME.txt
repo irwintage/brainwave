@@ -1,0 +1,52 @@
+BRAINWAVE
+Chrysasynth — Standalone Edition
+
+Thank you for downloading this tool.
+
+Brainwave is a binaural beats studio
+from the Chrysasynth lab.
+
+-----------------------------------
+
+HOW TO USE
+
+1. Extract the folder
+2. Open "index.html" in your browser
+3. Put on headphones
+4. Select a brainwave band
+5. Press Start and let the frequencies work
+
+-----------------------------------
+
+BANDS
+
+Delta  —  2 Hz  —  Deep sleep
+Theta  —  6 Hz  —  Meditation
+Alpha  — 10 Hz  —  Relaxation
+Beta   — 20 Hz  —  Focus
+Gamma  — 35 Hz  —  Peak state
+
+-----------------------------------
+
+COMPATIBILITY
+
+Works in modern browsers:
+• Chrome
+• Edge
+• Safari
+• Firefox
+
+Desktop and mobile supported.
+
+Note: audio starts after user interaction
+due to browser audio policies.
+
+-----------------------------------
+
+CHRYSASYNTH
+
+Chrysasynth is a collection of experimental sound tools
+and generative audio experiences.
+
+Explore more tools:
+https://chrysasynth.com

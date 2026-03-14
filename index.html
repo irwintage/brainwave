@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Brainwave — Chrysasynth Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#100E1A"/>
+  <meta name="description" content="Binaural beats studio — Chrysasynth"/>
+  <link rel="manifest" href="manifest.json"/>
+  <style>
+    @font-face {
+      font-family: 'Cinzel';
+      src: url('fonts/cinzel-v26-latin-regular.woff2') format('woff2');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Cinzel';
+      src: url('fonts/cinzel-v26-latin-500.woff2') format('woff2');
+      font-weight: 500; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/inter-v20-latin-300.woff2') format('woff2');
+      font-weight: 300; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/inter-v20-latin-regular.woff2') format('woff2');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Inter';
+      src: url('fonts/inter-v20-latin-500.woff2') format('woff2');
+      font-weight: 500; font-display: swap;
+    }
+
+    /* ── AURORA TOKENS ─────────────────────────────────────────────────── */
+    :root {
+      --accent-1: #78F0FF;
+      --accent-2: #C38CFF;
+      --surface:  #100E1A;
+      --panel:    rgba(16,14,26,0.82);
+      --stroke:   rgba(255,255,255,0.08);
+      --glow:     rgba(120,240,255,0.22);
+      --text-1:   #F1F7FF;
+      --text-2:   #B5C2D9;
+      --text-3:   rgba(181,194,217,0.45);
+
+      --font-d: 'Cinzel', serif;
+      --font-b: 'Inter', system-ui, sans-serif;
+
+      --sp-xs:  8px;
+      --sp-sm:  12px;
+      --sp-md:  16px;
+      --sp-lg:  24px;
+      --r-sm:   6px;
+      --r-md:   10px;
+      --r-lg:   14px;
+      --r-pill: 999px;
+
+      --fast:   80ms;
+      --medium: 140ms;
+
+      /* bande active */
+      --band-c1: #78F0FF;
+      --band-c2: #C38CFF;
+      --band-glow: rgba(120,240,255,0.20);
+    }
+
+    /* ── RESET ─────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font-b);
+      background: var(--surface);
+      color: var(--text-1);
+      min-height: 100dvh;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── SHELL ─────────────────────────────────────────────────────────── */
+    .shell {
+      width: 100%;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 20px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-md);
+    }
+
+    /* ── CARD ──────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r-lg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* ── HEADER ────────────────────────────────────────────────────────── */
+    .header {
+      padding: 14px var(--sp-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent-1);
+      box-shadow: 0 0 8px var(--accent-1);
+      transition: background var(--medium), box-shadow var(--medium);
+    }
+
+    .brand-dot.playing {
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%,100% { box-shadow: 0 0 6px var(--band-c1); transform: scale(1); }
+      50%      { box-shadow: 0 0 14px var(--band-c1); transform: scale(1.25); }
+    }
+
+    .brand-title {
+      font-family: var(--font-d);
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-1);
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-chip {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: var(--r-pill);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--stroke);
+      color: var(--text-2);
+      white-space: nowrap;
+      transition: color var(--medium), border-color var(--medium);
+    }
+
+    .meta-chip.active-chip {
+      color: var(--band-c1);
+      border-color: var(--band-c1);
+    }
+
+    /* ── WAVEFORM ──────────────────────────────────────────────────────── */
+    .vis-card {
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #wave {
+      width: 100%;
+      height: 220px;
+      display: block;
+    }
+
+    .vis-footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to top, rgba(16,14,26,0.85), transparent);
+    }
+
+    .vis-hint {
+      font-size: 0.62rem;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+    }
+
+    .vis-hz {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--band-c1);
+      letter-spacing: 0.06em;
+      transition: color var(--medium);
+    }
+
+    /* ── BANDS ─────────────────────────────────────────────────────────── */
+    .bands-section {
+      padding: var(--sp-sm) var(--sp-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+    }
+
+    .section-label {
+      font-size: 0.60rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--text-2);
+      cursor: pointer;
+      transition:
+        background var(--fast),
+        border-color var(--fast),
+        color var(--fast),
+        box-shadow var(--fast),
+        transform var(--fast);
+      user-select: none;
+    }
+
+    .chip:hover {
+      background: rgba(255,255,255,0.07);
+      transform: translateY(-1px);
+    }
+
+    .chip-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      opacity: 0.7;
+      transition: box-shadow var(--medium);
+    }
+
+    .chip.active {
+      border-color: var(--band-c1);
+      color: var(--text-1);
+      background: rgba(120,240,255,0.08);
+      box-shadow: 0 0 10px var(--band-glow);
+    }
+
+    .chip.active .chip-dot {
+      opacity: 1;
+      box-shadow: 0 0 5px var(--band-c1);
+    }
+
+    .chip-hz {
+      font-size: 0.60rem;
+      color: var(--text-3);
+    }
+
+    .chip.active .chip-hz {
+      color: var(--band-c1);
+      opacity: 0.8;
+    }
+
+    /* ── CONTROLS ──────────────────────────────────────────────────────── */
+    .controls-section {
+      padding: var(--sp-sm) var(--sp-md) var(--sp-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-md);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .control-value {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--band-c1);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      transition: color var(--medium);
+    }
+
+    /* Slider custom */
+    .slider-wrap {
+      position: relative;
+      height: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .slider-track {
+      position: absolute;
+      left: 0; right: 0;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      pointer-events: none;
+    }
+
+    .slider-fill {
+      position: absolute;
+      left: 0;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(to right, var(--band-c1), var(--band-c2));
+      pointer-events: none;
+      transition: width 16ms linear, background var(--medium);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 20px;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--band-c1);
+      box-shadow:
+        0 0 0 3px rgba(16,14,26,1),
+        0 0 0 4px var(--band-c1),
+        0 0 12px var(--band-glow);
+      transition: background var(--medium), box-shadow var(--medium), transform var(--fast);
+    }
+
+    input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.15);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--band-c1);
+      border: 3px solid var(--surface);
+      box-shadow: 0 0 10px var(--band-glow);
+    }
+
+    /* Timer chips row */
+    .timer-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .t-chip {
+      padding: 5px 14px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      font-size: 0.72rem;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: background var(--fast), border-color var(--fast), color var(--fast);
+      user-select: none;
+    }
+
+    .t-chip:hover { background: rgba(255,255,255,0.07); }
+
+    .t-chip.active {
+      border-color: var(--accent-2);
+      color: var(--accent-2);
+      background: rgba(195,140,255,0.08);
+    }
+
+    /* ── ACTIONS ───────────────────────────────────────────────────────── */
+    .actions {
+      padding: var(--sp-sm) var(--sp-md) var(--sp-md);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 40px;
+      padding: 0 20px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-1);
+      font-family: var(--font-b);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition:
+        background var(--fast),
+        border-color var(--fast),
+        transform var(--fast),
+        box-shadow var(--fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.09);
+      transform: translateY(-1px);
+    }
+
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--band-c1), var(--band-c2));
+      border-color: transparent;
+      color: #060A10;
+      font-weight: 600;
+      box-shadow: 0 4px 18px var(--band-glow);
+      transition:
+        filter var(--fast),
+        transform var(--fast),
+        box-shadow var(--medium);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 6px 24px var(--band-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      filter: brightness(0.96);
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--stroke);
+      color: var(--text-2);
+      font-size: 0.78rem;
+      padding: 0 14px;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.16);
+      color: var(--text-1);
+    }
+
+    /* ── RESPONSIVE ────────────────────────────────────────────────────── */
+    @media (max-width: 500px) {
+      #wave { height: 160px; }
+      .shell { padding: 14px 12px 20px; gap: 12px; }
+      .btn-primary { flex: 1; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="card header">
+    <div class="brand">
+      <div class="brand-dot" id="brandDot"></div>
+      <span class="brand-title">Brainwave</span>
+    </div>
+    <div class="header-meta">
+      <span class="meta-chip active-chip" id="stateChip">Alpha · 10 Hz</span>
+      <span class="meta-chip" id="timerChip">∞</span>
+    </div>
+  </div>
+
+  <!-- WAVEFORM -->
+  <div class="card vis-card">
+    <canvas id="wave" aria-label="Waveform visualizer"></canvas>
+    <div class="vis-footer">
+      <span class="vis-hint">🎧 Use headphones</span>
+      <span class="vis-hz" id="metaHz">200 Hz · +10.0 Hz</span>
+    </div>
+  </div>
+
+  <!-- BANDS + CONTROLS -->
+  <div class="card">
+
+    <div class="bands-section">
+      <div class="section-label">Brainwave Band</div>
+      <div class="chips-row" id="bandsRow"></div>
+    </div>
+
+    <div style="height:1px;background:var(--stroke);margin:0 16px"></div>
+
+    <div class="controls-section">
+
+      <!-- Carrier -->
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">Carrier Frequency</span>
+          <span class="control-value"><span id="carrierV">200</span> Hz</span>
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-track"></div>
+          <div class="slider-fill" id="carrierFill"></div>
+          <input type="range" id="carrier" min="100" max="400" step="1" value="200"/>
+        </div>
+      </div>
+
+      <!-- Beat -->
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">Beat Frequency</span>
+          <span class="control-value"><span id="beatV">10.0</span> Hz</span>
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-track"></div>
+          <div class="slider-fill" id="beatFill"></div>
+          <input type="range" id="beat" min="0.5" max="40" step="0.1" value="10"/>
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">Volume</span>
+          <span class="control-value" id="volV">70%</span>
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-track"></div>
+          <div class="slider-fill" id="volFill"></div>
+          <input type="range" id="vol" min="0" max="1" step="0.01" value="0.7"/>
+        </div>
+      </div>
+
+      <!-- Timer -->
+      <div class="control-group">
+        <div class="control-header">
+          <span class="control-label">Session Timer</span>
+        </div>
+        <div class="timer-chips" id="timerChips">
+          <div class="t-chip active" data-val="0">∞</div>
+          <div class="t-chip" data-val="300000">5 min</div>
+          <div class="t-chip" data-val="600000">10 min</div>
+          <div class="t-chip" data-val="1200000">20 min</div>
+          <div class="t-chip" data-val="3600000">60 min</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+      <button class="btn btn-primary" id="startBtn">▶ Start</button>
+      <button class="btn" id="stopBtn">■ Stop</button>
+      <button class="btn btn-ghost" id="fsBtn">⛶ Fullscreen</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ── BAND DATA ──────────────────────────────────────────────────────────────
+const BANDS = [
+  { id:"delta", name:"Delta", hz:2,  desc:"Deep sleep",  c1:"#B5C2D9", c2:"#7A8FAD", glow:"rgba(181,194,217,0.18)" },
+  { id:"theta", name:"Theta", hz:6,  desc:"Meditation",  c1:"#86E89C", c2:"#2DBB85", glow:"rgba(134,232,156,0.20)" },
+  { id:"alpha", name:"Alpha", hz:10, desc:"Relaxation",  c1:"#78F0FF", c2:"#C38CFF", glow:"rgba(120,240,255,0.22)" },
+  { id:"beta",  name:"Beta",  hz:20, desc:"Focus",       c1:"#FFB347", c2:"#FF7C7C", glow:"rgba(255,179,71,0.20)"  },
+  { id:"gamma", name:"Gamma", hz:35, desc:"Peak state",  c1:"#66E1FF", c2:"#6C8EFF", glow:"rgba(102,225,255,0.22)" },
+];
+
+const rs = document.documentElement.style;
+let currentBand = BANDS[2]; // alpha default
+let timerVal = 0;
+let stopTimerID = null;
+
+// ── DOM ────────────────────────────────────────────────────────────────────
+const brandDot   = document.getElementById("brandDot");
+const stateChip  = document.getElementById("stateChip");
+const timerChip  = document.getElementById("timerChip");
+const metaHz     = document.getElementById("metaHz");
+const carrierEl  = document.getElementById("carrier");
+const carrierV   = document.getElementById("carrierV");
+const beatEl     = document.getElementById("beat");
+const beatV      = document.getElementById("beatV");
+const volEl      = document.getElementById("vol");
+const volV       = document.getElementById("volV");
+const bandsRow   = document.getElementById("bandsRow");
+const timerChips = document.getElementById("timerChips");
+const startBtn   = document.getElementById("startBtn");
+const stopBtn    = document.getElementById("stopBtn");
+const fsBtn      = document.getElementById("fsBtn");
+const canvas     = document.getElementById("wave");
+const ctx2d      = canvas.getContext("2d");
+
+// ── AUDIO ──────────────────────────────────────────────────────────────────
+let actx, oscL, oscR, panL, panR, gainL, gainR, master, analyser, rafId;
+let targetVol = 0.7;
+
+function setupAudio() {
+  if (actx) return;
+  actx    = new (window.AudioContext || window.webkitAudioContext)();
+  oscL    = actx.createOscillator(); oscL.type = "sine";
+  oscR    = actx.createOscillator(); oscR.type = "sine";
+  panL    = actx.createStereoPanner ? actx.createStereoPanner() : null;
+  panR    = actx.createStereoPanner ? actx.createStereoPanner() : null;
+  gainL   = actx.createGain(); gainR = actx.createGain();
+  master  = actx.createGain(); master.gain.value = 0;
+  analyser = actx.createAnalyser(); analyser.fftSize = 2048;
+
+  if (panL) { oscL.connect(panL); panL.pan.value = -1; panL.connect(gainL); }
+  else oscL.connect(gainL);
+  if (panR) { oscR.connect(panR); panR.pan.value =  1; panR.connect(gainR); }
+  else oscR.connect(gainR);
+
+  gainL.connect(master); gainR.connect(master);
+  master.connect(actx.destination);
+  master.connect(analyser);
+  gainL.gain.value = 0.5; gainR.gain.value = 0.5;
+
+  updateFrequencies(true);
+  oscL.start(); oscR.start();
+}
+
+function updateFrequencies(init = false) {
+  const fc = parseFloat(carrierEl.value);
+  const fb = parseFloat(beatEl.value);
+  carrierV.textContent = Math.round(fc);
+  beatV.textContent    = fb.toFixed(1);
+  metaHz.textContent   = `${Math.round(fc)} Hz · +${fb.toFixed(1)} Hz`;
+  updateSliderFills();
+  if (!actx) return;
+  const t   = actx.currentTime;
+  const tau = init ? 0.02 : 0.06;
+  oscL.frequency.setTargetAtTime(fc,      t, tau);
+  oscR.frequency.setTargetAtTime(fc + fb, t, tau);
+}
+
+function fadeTo(g, v, dur = 0.12) {
+  if (!actx) return;
+  const now = actx.currentTime;
+  g.gain.cancelScheduledValues(now);
+  g.gain.setValueAtTime(g.gain.value, now);
+  g.gain.linearRampToValueAtTime(v, now + dur);
+}
+
+async function startAudio() {
+  setupAudio();
+  await actx.resume();
+  clearTimeout(stopTimerID);
+  fadeTo(master, targetVol, 0.14);
+  brandDot.classList.add("playing");
+  startBtn.textContent = "▶ Playing";
+
+  if (timerVal > 0) {
+    timerChip.textContent = `${Math.round(timerVal / 60000)} min`;
+    stopTimerID = setTimeout(stopAudio, timerVal);
+  } else {
+    timerChip.textContent = "∞";
+  }
+  animate();
+}
+
+async function stopAudio() {
+  if (!actx) return;
+  fadeTo(master, 0, 0.14);
+  brandDot.classList.remove("playing");
+  startBtn.textContent = "▶ Start";
+  setTimeout(async () => {
+    await actx.suspend();
+    cancelAnimationFrame(rafId); rafId = null;
+    clearTimeout(stopTimerID);
+    timerChip.textContent = "∞";
+    drawWave(true);
+  }, 160);
+}
+
+// ── WAVEFORM ───────────────────────────────────────────────────────────────
+function animate() { drawWave(); rafId = requestAnimationFrame(animate); }
+
+function drawWave(clearOnly = false) {
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const W = canvas.width  = canvas.clientWidth  * DPR;
+  const H = canvas.height = canvas.clientHeight * DPR;
+  ctx2d.setTransform(1, 0, 0, 1, 0, 0);
+  ctx2d.clearRect(0, 0, W, H);
+
+  // bg
+  const bg = ctx2d.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "rgba(16,14,26,0.95)");
+  bg.addColorStop(1, "rgba(10,8,18,0.98)");
+  ctx2d.fillStyle = bg;
+  ctx2d.fillRect(0, 0, W, H);
+
+  // subtle grid lines
+  ctx2d.lineWidth = 1;
+  ctx2d.strokeStyle = "rgba(255,255,255,0.04)";
+  for (let y = H * 0.25; y < H; y += H * 0.25) {
+    ctx2d.beginPath(); ctx2d.moveTo(0, y); ctx2d.lineTo(W, y); ctx2d.stroke();
+  }
+
+  // center line
+  ctx2d.lineWidth = 1;
+  ctx2d.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx2d.setLineDash([4, 6]);
+  ctx2d.beginPath(); ctx2d.moveTo(0, H * 0.5); ctx2d.lineTo(W, H * 0.5); ctx2d.stroke();
+  ctx2d.setLineDash([]);
+
+  if (clearOnly) return;
+
+  // get waveform data
+  const buf = new Float32Array(analyser ? analyser.fftSize : 2048);
+  if (analyser) analyser.getFloatTimeDomainData(buf);
+
+  const c1 = currentBand.c1;
+  const c2 = currentBand.c2;
+
+  // shadow/glow pass
+  const grad = ctx2d.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(0.5, c2);
+  grad.addColorStop(1, c1);
+
+  // glow layer
+  ctx2d.save();
+  ctx2d.globalAlpha = 0.18;
+  ctx2d.lineWidth = Math.max(6, H / 50);
+  ctx2d.strokeStyle = grad;
+  ctx2d.filter = `blur(${Math.max(3, H / 80)}px)`;
+  drawPath(buf, W, H);
+  ctx2d.stroke();
+  ctx2d.restore();
+
+  // main line
+  ctx2d.globalAlpha = 1;
+  ctx2d.lineWidth = Math.max(2, H / 130);
+  ctx2d.strokeStyle = grad;
+  ctx2d.shadowColor  = c1;
+  ctx2d.shadowBlur   = 10;
+  drawPath(buf, W, H);
+  ctx2d.stroke();
+  ctx2d.shadowBlur = 0;
+}
+
+function drawPath(buf, W, H) {
+  ctx2d.beginPath();
+  const step = Math.max(1, Math.floor(buf.length / W));
+  for (let i = 0; i < W; i++) {
+    const v = buf[i * step] || 0;
+    const y = (0.5 - v * 0.42) * H;
+    if (i === 0) ctx2d.moveTo(i, y);
+    else ctx2d.lineTo(i, y);
+  }
+}
+
+// ── SLIDER FILLS ───────────────────────────────────────────────────────────
+function updateSliderFills() {
+  const sliders = [
+    { el: carrierEl, fill: document.getElementById("carrierFill") },
+    { el: beatEl,    fill: document.getElementById("beatFill")    },
+    { el: volEl,     fill: document.getElementById("volFill")     },
+  ];
+  sliders.forEach(({ el, fill }) => {
+    if (!fill) return;
+    const pct = (el.value - el.min) / (el.max - el.min) * 100;
+    fill.style.width = pct + "%";
+  });
+}
+
+// ── BAND THEME ─────────────────────────────────────────────────────────────
+function applyBandTheme(band) {
+  currentBand = band;
+  rs.setProperty("--band-c1",   band.c1);
+  rs.setProperty("--band-c2",   band.c2);
+  rs.setProperty("--band-glow", band.glow);
+  stateChip.textContent = `${band.name} · ${band.hz} Hz`;
+  metaHz.style.color = band.c1;
+  updateSliderFills();
+}
+
+// ── BUILD BANDS ────────────────────────────────────────────────────────────
+BANDS.forEach(band => {
+  const chip = document.createElement("div");
+  chip.className = "chip" + (band.id === "alpha" ? " active" : "");
+  chip.innerHTML = `
+    <span class="chip-dot" style="background:${band.c1}"></span>
+    <span>${band.name}</span>
+    <span class="chip-hz">${band.hz} Hz</span>
+  `;
+  chip.addEventListener("click", () => {
+    document.querySelectorAll("#bandsRow .chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    beatEl.value = band.hz;
+    updateFrequencies();
+    applyBandTheme(band);
+    if (actx && actx.state === "running") updateFrequencies();
+  });
+  bandsRow.appendChild(chip);
+});
+
+// ── TIMER CHIPS ────────────────────────────────────────────────────────────
+document.querySelectorAll(".t-chip").forEach(tc => {
+  tc.addEventListener("click", () => {
+    document.querySelectorAll(".t-chip").forEach(c => c.classList.remove("active"));
+    tc.classList.add("active");
+    timerVal = parseInt(tc.dataset.val, 10);
+    timerChip.textContent = timerVal > 0 ? `${Math.round(timerVal / 60000)} min` : "∞";
+  });
+});
+
+// ── SLIDER EVENTS ──────────────────────────────────────────────────────────
+carrierEl.addEventListener("input", () => updateFrequencies());
+beatEl.addEventListener("input",    () => updateFrequencies());
+volEl.addEventListener("input", () => {
+  targetVol = parseFloat(volEl.value);
+  volV.textContent = Math.round(targetVol * 100) + "%";
+  updateSliderFills();
+  if (actx && actx.state === "running") fadeTo(master, targetVol, 0.08);
+});
+
+// ── ACTIONS ────────────────────────────────────────────────────────────────
+startBtn.addEventListener("click", startAudio);
+stopBtn.addEventListener("click",  stopAudio);
+fsBtn.addEventListener("click", () => {
+  const el = document.documentElement;
+  const go = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (go) go.call(el);
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+applyBandTheme(BANDS[2]);
+updateFrequencies();
+volV.textContent = Math.round(parseFloat(volEl.value) * 100) + "%";
+drawWave(true);
+
+// AUTO-HEIGHT HOSTINGER
+function reportH() {
+  const h = document.documentElement.scrollHeight;
+  try {
+    window.parent.postMessage({ type:"setHeight", height:h }, "*");
+    window.parent.postMessage({ iframe:true, height:h }, "*");
+    window.parent.postMessage("height:"+h, "*");
+  } catch(e) {}
+}
+window.addEventListener("load", reportH);
+if (window.ResizeObserver) new ResizeObserver(reportH).observe(document.documentElement);
+else window.addEventListener("resize", reportH);
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./brainwave-sw.js");</script>
+</body>
+</html>
