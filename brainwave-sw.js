@@ -1,4 +1,4 @@
-const CACHE = "brainwave-v4";
+const CACHE = "brainwave-v5";
 
 const ASSETS = [
   "./",
@@ -13,6 +13,7 @@ const ASSETS = [
   "./icon-512.PNG"
 ];
 
+/* INSTALL */
 self.addEventListener("install", event => {
   self.skipWaiting();
 
@@ -32,6 +33,7 @@ self.addEventListener("install", event => {
   );
 });
 
+/* ACTIVATE */
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -46,21 +48,38 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+/* FETCH */
 self.addEventListener("fetch", event => {
+  const url = new URL(event.request.url);
+
+  // Ignore chrome-extension://, blob:, data:, etc.
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return;
+  }
+
+  // Only cache GET requests
+  if (event.request.method !== "GET") {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cached => {
-      if (cached) return cached;
+      if (cached) {
+        return cached;
+      }
 
       return fetch(event.request).then(response => {
-        if (
-          response &&
-          response.status === 200 &&
-          event.request.method === "GET"
-        ) {
+        if (response && response.status === 200) {
           const clone = response.clone();
 
           caches.open(CACHE).then(cache => {
-            cache.put(event.request, clone);
+            cache.put(event.request, clone).catch(error => {
+              console.warn(
+                "[SW] Cache put failed:",
+                event.request.url,
+                error
+              );
+            });
           });
         }
 
