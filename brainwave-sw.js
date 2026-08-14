@@ -10,7 +10,7 @@ const ASSETS = [
   "./inter-v20-latin-regular.woff2",
   "./inter-v20-latin-500.woff2",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.PNG"
 ];
 
 self.addEventListener("install", e => {
