@@ -492,6 +492,137 @@ body.bw-splash-open{
   }
 }
 
+
+/* ============================================================
+   BRAINWAVE V3.4 — MOBILE FIT POLISH
+   ============================================================ */
+
+.bw-splash-footer{
+  padding-bottom:34px;
+}
+
+.app{
+  min-height:100dvh;
+  max-height:100dvh;
+  overflow:hidden;
+  gap:10px;
+  padding:
+    max(12px,env(safe-area-inset-top))
+    14px
+    max(10px,env(safe-area-inset-bottom));
+}
+
+.visual-stage{
+  min-height:205px;
+}
+
+#wave{
+  height:205px;
+}
+
+.band-block{
+  gap:6px;
+}
+
+.controls{
+  gap:7px;
+  padding:10px 11px;
+}
+
+.control{
+  gap:3px;
+}
+
+.slider-wrap,
+input[type=range]{
+  height:15px;
+}
+
+.timer-block{
+  gap:8px;
+}
+
+.actions{
+  margin-top:0;
+  padding-bottom:max(2px, env(safe-area-inset-bottom));
+}
+
+#startBtn{
+  min-height:41px;
+}
+
+@media(max-width:380px){
+  .bw-splash-footer{
+    padding-bottom:28px;
+  }
+
+  .app{
+    gap:8px;
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .visual-stage{
+    min-height:192px;
+  }
+
+  #wave{
+    height:192px;
+  }
+
+  .controls{
+    padding:9px 10px;
+    gap:6px;
+  }
+
+  .band-chip{
+    min-height:28px;
+  }
+
+  .t-chip{
+    min-height:26px;
+  }
+
+  #startBtn{
+    min-height:39px;
+  }
+}
+
+@media(max-height:700px){
+  .bw-splash-footer{
+    padding-bottom:22px;
+  }
+
+  .visual-stage{
+    min-height:178px;
+  }
+
+  #wave{
+    height:178px;
+  }
+
+  .controls{
+    gap:5px;
+    padding:8px 10px;
+  }
+
+  .control{
+    gap:2px;
+  }
+
+  .band-chip{
+    min-height:27px;
+  }
+
+  .t-chip{
+    min-height:25px;
+  }
+
+  #startBtn{
+    min-height:38px;
+  }
+}
+
 </style>
 </head>
 
