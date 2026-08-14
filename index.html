@@ -353,10 +353,167 @@ input[type=range]::-moz-range-thumb{
   .band-chip{min-height:48px}
 }
 
-  </style>
+  
+/* ============================================================
+   BRAINWAVE — ROBUST FULLSCREEN SPLASH
+   ============================================================ */
+body.bw-splash-open{
+  overflow:hidden;
+}
+
+.bw-splash{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  padding:
+    max(22px, env(safe-area-inset-top))
+    20px
+    max(26px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 46%, rgba(84,217,255,.045), transparent 24%),
+    radial-gradient(circle at 50% 54%, rgba(139,92,255,.045), transparent 30%),
+    linear-gradient(180deg,#111318 0%,#0d0f12 54%,#090a0d 100%);
+  overflow:hidden;
+  opacity:1;
+  visibility:visible;
+  transition:opacity .5s ease, visibility .5s ease;
+}
+
+.bw-splash.is-leaving{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.bw-splash-canvas{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  width:100%;
+  height:100%;
+  pointer-events:none !important;
+}
+
+.bw-splash-header,
+.bw-splash-main,
+.bw-splash-footer{
+  position:relative;
+  z-index:2;
+  pointer-events:auto;
+}
+
+.bw-splash-header{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.bw-splash-brand{
+  font-size:.59rem;
+  font-weight:500;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:rgba(244,246,251,.42);
+}
+
+.bw-splash-main{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  pointer-events:none;
+}
+
+.bw-splash-title{
+  font-family:var(--font-d);
+  font-size:clamp(1.55rem,7vw,2rem);
+  font-weight:500;
+  letter-spacing:.045em;
+  color:var(--t1);
+  text-shadow:
+    0 0 24px rgba(84,217,255,.05),
+    0 0 34px rgba(139,92,255,.04);
+}
+
+.bw-splash-subtitle{
+  margin-top:9px;
+  color:var(--t3);
+  font-size:.67rem;
+  letter-spacing:.04em;
+}
+
+.bw-splash-footer{
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+}
+
+.bw-enter{
+  position:relative;
+  z-index:10;
+  min-width:162px;
+  min-height:46px;
+  padding:0 24px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.11);
+  background:#f1f3f6;
+  color:#111318;
+  font-family:var(--font-b);
+  font-size:.68rem;
+  font-weight:500;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  cursor:pointer;
+  pointer-events:auto !important;
+  touch-action:manipulation;
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.30),
+    0 0 0 1px rgba(255,255,255,.02) inset;
+  transition:transform .12s ease, opacity .12s ease;
+}
+
+.bw-enter:active{
+  transform:scale(.985);
+}
+
+@media(max-height:700px){
+  .bw-splash{
+    padding-top:max(16px, env(safe-area-inset-top));
+    padding-bottom:max(18px, env(safe-area-inset-bottom));
+  }
+  .bw-splash-title{
+    font-size:1.45rem;
+  }
+}
+
+</style>
 </head>
 
-<body>
+<body class="bw-splash-open">
+
+<div class="bw-splash" id="bwSplash">
+  <canvas class="bw-splash-canvas" id="bwSplashCanvas" aria-hidden="true"></canvas>
+
+  <div class="bw-splash-header">
+    <div class="bw-splash-brand">Chrysasynth</div>
+  </div>
+
+  <div class="bw-splash-main">
+    <div class="bw-splash-title">Brainwave</div>
+    <div class="bw-splash-subtitle">Binaural frequency generator</div>
+  </div>
+
+  <div class="bw-splash-footer">
+    <button class="bw-enter" id="bwEnterBtn" type="button">Enter</button>
+  </div>
+</div>
+
 <div class="app">
 
   <header class="topbar">
@@ -786,6 +943,168 @@ if (window.ResizeObserver) new ResizeObserver(reportH).observe(document.document
 else window.addEventListener("resize", reportH);
 
 </script>
+
+<script>
+(() => {
+  const splash = document.getElementById("bwSplash");
+  const canvas = document.getElementById("bwSplashCanvas");
+  const enter = document.getElementById("bwEnterBtn");
+
+  if (!splash || !canvas || !enter) return;
+
+  const ctx = canvas.getContext("2d");
+  let dpr = 1;
+  let w = 0;
+  let h = 0;
+  let raf = 0;
+  const started = performance.now();
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth;
+    h = window.innerHeight;
+
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function streamPath(yBase, amp, freq, phase, time, skew){
+    ctx.beginPath();
+
+    for(let x = -50; x <= w + 50; x += 7){
+      const nx = x / Math.max(1, w);
+      const center = Math.exp(-Math.pow((nx - .5) / .24, 2));
+      const y =
+        yBase +
+        Math.sin(nx * Math.PI * freq + phase + time * .72) * amp +
+        Math.sin(nx * Math.PI * 1.7 - time * .36 + phase * .55) * amp * .28 +
+        center * skew;
+
+      if (x === -50) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+  }
+
+  function paintStream(opts, time){
+    const { y, amp, freq, phase, rgba, skew } = opts;
+
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    streamPath(y, amp, freq, phase, time, skew);
+    ctx.strokeStyle = rgba(.07);
+    ctx.lineWidth = 42;
+    ctx.filter = "blur(20px)";
+    ctx.stroke();
+
+    streamPath(y, amp, freq, phase, time, skew);
+    ctx.strokeStyle = rgba(.16);
+    ctx.lineWidth = 19;
+    ctx.filter = "blur(8px)";
+    ctx.stroke();
+
+    streamPath(y, amp, freq, phase, time, skew);
+    ctx.strokeStyle = rgba(.52);
+    ctx.lineWidth = 3;
+    ctx.filter = "blur(.4px)";
+    ctx.shadowColor = rgba(.5);
+    ctx.shadowBlur = 18;
+    ctx.stroke();
+
+    streamPath(y, amp * .92, freq, phase + .08, time, skew * .85);
+    ctx.strokeStyle = "rgba(245,250,255,.42)";
+    ctx.lineWidth = .7;
+    ctx.filter = "none";
+    ctx.shadowBlur = 0;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function frame(now){
+    const t = (now - started) / 1000;
+    ctx.clearRect(0, 0, w, h);
+
+    const field = ctx.createRadialGradient(
+      w * .5, h * .5, 0,
+      w * .5, h * .5, Math.min(w, h) * .48
+    );
+    field.addColorStop(0, "rgba(110,110,255,.055)");
+    field.addColorStop(.4, "rgba(84,217,255,.022)");
+    field.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = field;
+    ctx.fillRect(0, 0, w, h);
+
+    paintStream({
+      y:h * .39,
+      amp:24,
+      freq:3.15,
+      phase:.2,
+      skew:14,
+      rgba:(a)=>`rgba(84,217,255,${a})`
+    }, t);
+
+    paintStream({
+      y:h * .60,
+      amp:27,
+      freq:2.75,
+      phase:2.15,
+      skew:-16,
+      rgba:(a)=>`rgba(139,92,255,${a})`
+    }, t);
+
+    // subtle central interference filaments
+    ctx.save();
+    ctx.globalAlpha = .28;
+    ctx.lineWidth = .65;
+    ctx.strokeStyle = "rgba(225,232,255,.18)";
+    for(let k = 0; k < 3; k++){
+      ctx.beginPath();
+      for(let x = 0; x <= w; x += 8){
+        const nx = x / Math.max(1, w);
+        const y =
+          h * .5 +
+          Math.sin(nx * Math.PI * (5.4 + k * .5) + t * (.65 + k * .08)) * (3.5 + k) +
+          Math.sin(nx * Math.PI * 2.3 - t * .44) * 2.4;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  resize();
+  window.addEventListener("resize", resize, { passive:true });
+  raf = requestAnimationFrame(frame);
+
+  function closeSplash(){
+    enter.disabled = true;
+    splash.classList.add("is-leaving");
+    document.body.classList.remove("bw-splash-open");
+
+    window.setTimeout(() => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+      splash.remove();
+    }, 540);
+  }
+
+  enter.addEventListener("click", closeSplash);
+  enter.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    closeSplash();
+  }, { passive:false });
+})();
+</script>
+
 <script>
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./brainwave-sw.js");
 </script>
