@@ -1,4 +1,4 @@
-const CACHE = "brainwave-v2";
+const CACHE = "brainwave-v4";
 
 const ASSETS = [
   "./",
@@ -13,28 +13,59 @@ const ASSETS = [
   "./icon-512.PNG"
 ];
 
-self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
+self.addEventListener("install", event => {
   self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(CACHE).then(async cache => {
+      await Promise.all(
+        ASSETS.map(async asset => {
+          try {
+            await cache.add(asset);
+            console.log("[SW] Cached:", asset);
+          } catch (error) {
+            console.warn("[SW] Failed to cache:", asset, error);
+          }
+        })
+      );
+    })
+  );
 });
 
-self.addEventListener("activate", e => {
-  e.waitUntil(
+self.addEventListener("activate", event => {
+  event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(k => k !== CACHE)
-          .map(k => caches.delete(k))
+          .filter(key => key !== CACHE)
+          .map(key => caches.delete(key))
       )
     )
   );
+
   self.clients.claim();
 });
 
-self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+self.addEventListener("fetch", event => {
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+
+      return fetch(event.request).then(response => {
+        if (
+          response &&
+          response.status === 200 &&
+          event.request.method === "GET"
+        ) {
+          const clone = response.clone();
+
+          caches.open(CACHE).then(cache => {
+            cache.put(event.request, clone);
+          });
+        }
+
+        return response;
+      });
+    })
   );
 });
