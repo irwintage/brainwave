@@ -4,605 +4,496 @@
   <meta charset="UTF-8"/>
   <title>Brainwave — Chrysasynth Studio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <meta name="theme-color" content="#100E1A"/>
+  <meta name="theme-color" content="#0d0f12"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="description" content="Binaural beats studio — Chrysasynth"/>
   <link rel="manifest" href="manifest.json"/>
   <style>
-    @font-face {
-      font-family: 'Cinzel';
-      src: url('fonts/cinzel-v26-latin-regular.woff2') format('woff2');
-      font-weight: 400; font-display: swap;
-    }
-    @font-face {
-      font-family: 'Cinzel';
-      src: url('fonts/cinzel-v26-latin-500.woff2') format('woff2');
-      font-weight: 500; font-display: swap;
-    }
-    @font-face {
-      font-family: 'Inter';
-      src: url('fonts/inter-v20-latin-300.woff2') format('woff2');
-      font-weight: 300; font-display: swap;
-    }
-    @font-face {
-      font-family: 'Inter';
-      src: url('fonts/inter-v20-latin-regular.woff2') format('woff2');
-      font-weight: 400; font-display: swap;
-    }
-    @font-face {
-      font-family: 'Inter';
-      src: url('fonts/inter-v20-latin-500.woff2') format('woff2');
-      font-weight: 500; font-display: swap;
-    }
 
-    /* ── AURORA TOKENS ─────────────────────────────────────────────────── */
-    :root {
-      --accent-1: #78F0FF;
-      --accent-2: #C38CFF;
-      --surface:  #100E1A;
-      --panel:    rgba(16,14,26,0.82);
-      --stroke:   rgba(255,255,255,0.08);
-      --glow:     rgba(120,240,255,0.22);
-      --text-1:   #F1F7FF;
-      --text-2:   #B5C2D9;
-      --text-3:   rgba(181,194,217,0.45);
+@font-face{font-family:'Cinzel';src:url('./cinzel-v26-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Cinzel';src:url('./cinzel-v26-latin-500.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Inter';src:url('./inter-v20-latin-300.woff2') format('woff2');font-weight:300;font-display:swap}
+@font-face{font-family:'Inter';src:url('./inter-v20-latin-regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Inter';src:url('./inter-v20-latin-500.woff2') format('woff2');font-weight:500;font-display:swap}
 
-      --font-d: 'Cinzel', serif;
-      --font-b: 'Inter', system-ui, sans-serif;
+:root{
+  --bg:#0d0f12;
+  --bg2:#090a0d;
+  --t1:#f4f6fb;
+  --t2:rgba(244,246,251,.72);
+  --t3:rgba(244,246,251,.42);
+  --stroke:rgba(255,255,255,.075);
+  --surface:rgba(255,255,255,.03);
+  --band-c1:#54D9FF;
+  --band-c2:#8B5CFF;
+  --band-glow:rgba(84,217,255,.20);
+  --font-d:'Cinzel',serif;
+  --font-b:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{
+  min-height:100%;
+  background:var(--bg);
+  color-scheme:dark;
+  -webkit-text-size-adjust:100%;
+  overscroll-behavior:none;
+}
+body{
+  min-height:100vh;
+  min-height:100dvh;
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--t1);
+  overflow-x:hidden;
+  overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 20%,color-mix(in srgb,var(--band-c1) 12%,transparent),transparent 31%),
+    radial-gradient(circle at 62% 37%,color-mix(in srgb,var(--band-c2) 9%,transparent),transparent 28%),
+    linear-gradient(180deg,#111318 0%,var(--bg) 50%,var(--bg2) 100%);
+  transition:background .5s ease;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,255,255,.035),transparent 38%),
+    linear-gradient(120deg,transparent 0 46%,rgba(255,255,255,.013) 50%,transparent 54%);
+}
+button,input{font:inherit}
+.app{
+  width:min(100%,460px);
+  min-height:100vh;
+  min-height:100dvh;
+  margin:0 auto;
+  padding:max(18px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+}
+.eyebrow{
+  font-size:.58rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin-bottom:4px;
+}
+.product-title{
+  font-family:var(--font-d);
+  font-size:1.35rem;
+  font-weight:500;
+  letter-spacing:.02em;
+}
+.status-stack{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.status-pill{
+  min-height:29px;
+  padding:0 9px;
+  border:1px solid var(--stroke);
+  border-radius:999px;
+  background:var(--surface);
+  color:var(--t2);
+  display:inline-flex;
+  align-items:center;
+  font-size:.58rem;
+  font-weight:500;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+.status-pill.primary{
+  color:var(--band-c1);
+  border-color:color-mix(in srgb,var(--band-c1) 24%,transparent);
+  background:color-mix(in srgb,var(--band-c1) 5%,var(--surface));
+}
+.visual-stage{
+  position:relative;
+  min-height:300px;
+  display:grid;
+  place-items:center;
+}
+.visual-stage::before{
+  content:"";
+  position:absolute;
+  width:88%;
+  aspect-ratio:1.35;
+  border-radius:50%;
+  background:radial-gradient(ellipse,color-mix(in srgb,var(--band-c1) 13%,transparent),transparent 66%);
+  filter:blur(30px);
+  pointer-events:none;
+}
+#wave{
+  width:100%;
+  height:290px;
+  display:block;
+  border-radius:24px;
+  position:relative;
+  z-index:1;
+}
+.visual-overlay{
+  position:absolute;
+  z-index:2;
+  left:12px;
+  right:12px;
+  bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.micro-pill{
+  min-height:28px;
+  padding:0 9px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.055);
+  background:rgba(9,10,13,.46);
+  backdrop-filter:blur(10px);
+  display:inline-flex;
+  align-items:center;
+  color:var(--t3);
+  font-size:.58rem;
+}
+.micro-pill.hz{color:var(--band-c1)}
+.band-block{display:flex;flex-direction:column;gap:9px}
+.section-label{
+  font-size:.58rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--t3);
+}
+.bands-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+}
+.band-chip{
+  min-height:54px;
+  padding:8px 5px;
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:15px;
+  background:rgba(255,255,255,.026);
+  color:var(--t2);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  cursor:pointer;
+  user-select:none;
+  transition:.16s ease;
+}
+.band-chip .dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--dot-color,var(--band-c1));
+  box-shadow:0 0 8px color-mix(in srgb,var(--dot-color,var(--band-c1)) 60%,transparent);
+}
+.band-chip .name{font-size:.62rem;font-weight:500}
+.band-chip .hz{font-size:.51rem;color:var(--t3)}
+.band-chip.active{
+  border-color:color-mix(in srgb,var(--band-c1) 42%,transparent);
+  background:color-mix(in srgb,var(--band-c1) 6%,rgba(255,255,255,.024));
+  color:var(--t1);
+  box-shadow:0 0 16px var(--band-glow);
+}
+.controls{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.05);
+  background:rgba(255,255,255,.022);
+}
+.control{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.control-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.control-name{
+  font-size:.61rem;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--t2);
+}
+.control-value{
+  font-size:.64rem;
+  font-weight:500;
+  color:var(--band-c1);
+  font-variant-numeric:tabular-nums;
+}
+.slider-wrap{
+  position:relative;
+  height:20px;
+  display:flex;
+  align-items:center;
+}
+.slider-track,.slider-fill{
+  position:absolute;
+  left:0;
+  height:3px;
+  border-radius:999px;
+  pointer-events:none;
+}
+.slider-track{right:0;background:rgba(255,255,255,.10)}
+.slider-fill{background:linear-gradient(90deg,var(--band-c1),var(--band-c2))}
+input[type=range]{
+  -webkit-appearance:none;
+  appearance:none;
+  width:100%;
+  height:20px;
+  background:transparent;
+  position:relative;
+  z-index:1;
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:16px;height:16px;border-radius:50%;
+  background:#eef3f7;
+  border:3px solid #17191d;
+  box-shadow:0 0 0 1px rgba(255,255,255,.10),0 0 12px var(--band-glow);
+}
+input[type=range]::-moz-range-thumb{
+  width:10px;height:10px;border-radius:50%;
+  background:#eef3f7;
+  border:3px solid #17191d;
+  box-shadow:0 0 0 1px rgba(255,255,255,.10),0 0 12px var(--band-glow);
+}
+.timer-block{display:flex;flex-direction:column;gap:8px}
+.timer-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.t-chip{
+  min-height:30px;
+  padding:0 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.065);
+  background:rgba(255,255,255,.025);
+  color:var(--t2);
+  display:inline-flex;
+  align-items:center;
+  font-size:.60rem;
+  cursor:pointer;
+}
+.t-chip.active{
+  color:color-mix(in srgb,var(--band-c2) 76%,white);
+  border-color:color-mix(in srgb,var(--band-c2) 40%,transparent);
+  background:color-mix(in srgb,var(--band-c2) 6%,rgba(255,255,255,.025));
+}
+.actions{
+  display:grid;
+  grid-template-columns:1.3fr .85fr;
+  gap:8px;
+}
+.btn{
+  min-height:44px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.075);
+  background:rgba(255,255,255,.03);
+  color:var(--t2);
+  cursor:pointer;
+  font-size:.69rem;
+  font-weight:500;
+}
+.btn.primary{
+  color:#dff8ff;
+  border-color:color-mix(in srgb,var(--band-c1) 24%,transparent);
+  background:color-mix(in srgb,var(--band-c1) 7%,rgba(255,255,255,.025));
+  box-shadow:0 0 20px color-mix(in srgb,var(--band-c1) 8%,transparent);
+}
+.utility{
+  display:flex;
+  justify-content:center;
+}
+.utility .btn{
+  min-height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:.58rem;
+  background:transparent;
+}
+@media(max-width:380px){
+  .app{gap:14px;padding-left:13px;padding-right:13px}
+  .product-title{font-size:1.22rem}
+  .status-pill{font-size:.54rem;padding:0 7px}
+  .visual-stage{min-height:250px}
+  #wave{height:240px}
+  .band-chip{min-height:50px}
+  .band-chip .name{font-size:.57rem}
+}
+@media(max-height:720px){
+  .app{gap:12px}
+  .visual-stage{min-height:220px}
+  #wave{height:210px}
+  .controls{gap:10px;padding:11px}
+  .band-chip{min-height:48px}
+}
 
-      --sp-xs:  8px;
-      --sp-sm:  12px;
-      --sp-md:  16px;
-      --sp-lg:  24px;
-      --r-sm:   6px;
-      --r-md:   10px;
-      --r-lg:   14px;
-      --r-pill: 999px;
-
-      --fast:   80ms;
-      --medium: 140ms;
-
-      /* bande active */
-      --band-c1: #78F0FF;
-      --band-c2: #C38CFF;
-      --band-glow: rgba(120,240,255,0.20);
-    }
-
-    /* ── RESET ─────────────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-text-size-adjust: 100%; }
-    body {
-      font-family: var(--font-b);
-      background: var(--surface);
-      color: var(--text-1);
-      min-height: 100dvh;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ── SHELL ─────────────────────────────────────────────────────────── */
-    .shell {
-      width: 100%;
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 20px 16px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-md);
-    }
-
-    /* ── CARD ──────────────────────────────────────────────────────────── */
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      border-radius: var(--r-lg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    /* ── HEADER ────────────────────────────────────────────────────────── */
-    .header {
-      padding: 14px var(--sp-md);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent-1);
-      box-shadow: 0 0 8px var(--accent-1);
-      transition: background var(--medium), box-shadow var(--medium);
-    }
-
-    .brand-dot.playing {
-      animation: dotPulse 1.4s ease-in-out infinite;
-    }
-
-    @keyframes dotPulse {
-      0%,100% { box-shadow: 0 0 6px var(--band-c1); transform: scale(1); }
-      50%      { box-shadow: 0 0 14px var(--band-c1); transform: scale(1.25); }
-    }
-
-    .brand-title {
-      font-family: var(--font-d);
-      font-size: 0.95rem;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-1);
-    }
-
-    .header-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .meta-chip {
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      padding: 4px 10px;
-      border-radius: var(--r-pill);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--stroke);
-      color: var(--text-2);
-      white-space: nowrap;
-      transition: color var(--medium), border-color var(--medium);
-    }
-
-    .meta-chip.active-chip {
-      color: var(--band-c1);
-      border-color: var(--band-c1);
-    }
-
-    /* ── WAVEFORM ──────────────────────────────────────────────────────── */
-    .vis-card {
-      padding: 0;
-      overflow: hidden;
-      position: relative;
-    }
-
-    #wave {
-      width: 100%;
-      height: 220px;
-      display: block;
-    }
-
-    .vis-footer {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(to top, rgba(16,14,26,0.85), transparent);
-    }
-
-    .vis-hint {
-      font-size: 0.62rem;
-      color: var(--text-3);
-      letter-spacing: 0.04em;
-    }
-
-    .vis-hz {
-      font-size: 0.68rem;
-      font-weight: 500;
-      color: var(--band-c1);
-      letter-spacing: 0.06em;
-      transition: color var(--medium);
-    }
-
-    /* ── BANDS ─────────────────────────────────────────────────────────── */
-    .bands-section {
-      padding: var(--sp-sm) var(--sp-md);
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-sm);
-    }
-
-    .section-label {
-      font-size: 0.60rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-3);
-    }
-
-    .chips-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: var(--r-pill);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.04);
-      font-size: 0.72rem;
-      font-weight: 400;
-      color: var(--text-2);
-      cursor: pointer;
-      transition:
-        background var(--fast),
-        border-color var(--fast),
-        color var(--fast),
-        box-shadow var(--fast),
-        transform var(--fast);
-      user-select: none;
-    }
-
-    .chip:hover {
-      background: rgba(255,255,255,0.07);
-      transform: translateY(-1px);
-    }
-
-    .chip-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      opacity: 0.7;
-      transition: box-shadow var(--medium);
-    }
-
-    .chip.active {
-      border-color: var(--band-c1);
-      color: var(--text-1);
-      background: rgba(120,240,255,0.08);
-      box-shadow: 0 0 10px var(--band-glow);
-    }
-
-    .chip.active .chip-dot {
-      opacity: 1;
-      box-shadow: 0 0 5px var(--band-c1);
-    }
-
-    .chip-hz {
-      font-size: 0.60rem;
-      color: var(--text-3);
-    }
-
-    .chip.active .chip-hz {
-      color: var(--band-c1);
-      opacity: 0.8;
-    }
-
-    /* ── CONTROLS ──────────────────────────────────────────────────────── */
-    .controls-section {
-      padding: var(--sp-sm) var(--sp-md) var(--sp-md);
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-md);
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .control-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .control-label {
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-2);
-    }
-
-    .control-value {
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: var(--band-c1);
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.04em;
-      transition: color var(--medium);
-    }
-
-    /* Slider custom */
-    .slider-wrap {
-      position: relative;
-      height: 20px;
-      display: flex;
-      align-items: center;
-    }
-
-    .slider-track {
-      position: absolute;
-      left: 0; right: 0;
-      height: 3px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.10);
-      pointer-events: none;
-    }
-
-    .slider-fill {
-      position: absolute;
-      left: 0;
-      height: 3px;
-      border-radius: 999px;
-      background: linear-gradient(to right, var(--band-c1), var(--band-c2));
-      pointer-events: none;
-      transition: width 16ms linear, background var(--medium);
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 20px;
-      background: transparent;
-      outline: none;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: var(--band-c1);
-      box-shadow:
-        0 0 0 3px rgba(16,14,26,1),
-        0 0 0 4px var(--band-c1),
-        0 0 12px var(--band-glow);
-      transition: background var(--medium), box-shadow var(--medium), transform var(--fast);
-    }
-
-    input[type="range"]:active::-webkit-slider-thumb {
-      transform: scale(1.15);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: var(--band-c1);
-      border: 3px solid var(--surface);
-      box-shadow: 0 0 10px var(--band-glow);
-    }
-
-    /* Timer chips row */
-    .timer-chips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .t-chip {
-      padding: 5px 14px;
-      border-radius: var(--r-pill);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.04);
-      font-size: 0.72rem;
-      color: var(--text-2);
-      cursor: pointer;
-      transition: background var(--fast), border-color var(--fast), color var(--fast);
-      user-select: none;
-    }
-
-    .t-chip:hover { background: rgba(255,255,255,0.07); }
-
-    .t-chip.active {
-      border-color: var(--accent-2);
-      color: var(--accent-2);
-      background: rgba(195,140,255,0.08);
-    }
-
-    /* ── ACTIONS ───────────────────────────────────────────────────────── */
-    .actions {
-      padding: var(--sp-sm) var(--sp-md) var(--sp-md);
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      height: 40px;
-      padding: 0 20px;
-      border-radius: var(--r-md);
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,0.05);
-      color: var(--text-1);
-      font-family: var(--font-b);
-      font-size: 0.82rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      transition:
-        background var(--fast),
-        border-color var(--fast),
-        transform var(--fast),
-        box-shadow var(--fast);
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .btn:hover {
-      background: rgba(255,255,255,0.09);
-      transform: translateY(-1px);
-    }
-
-    .btn:active { transform: translateY(0); }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--band-c1), var(--band-c2));
-      border-color: transparent;
-      color: #060A10;
-      font-weight: 600;
-      box-shadow: 0 4px 18px var(--band-glow);
-      transition:
-        filter var(--fast),
-        transform var(--fast),
-        box-shadow var(--medium);
-    }
-
-    .btn-primary:hover {
-      filter: brightness(1.06);
-      box-shadow: 0 6px 24px var(--band-glow);
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:active {
-      filter: brightness(0.96);
-      transform: translateY(0);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: var(--stroke);
-      color: var(--text-2);
-      font-size: 0.78rem;
-      padding: 0 14px;
-    }
-
-    .btn-ghost:hover {
-      border-color: rgba(255,255,255,0.16);
-      color: var(--text-1);
-    }
-
-    /* ── RESPONSIVE ────────────────────────────────────────────────────── */
-    @media (max-width: 500px) {
-      #wave { height: 160px; }
-      .shell { padding: 14px 12px 20px; gap: 12px; }
-      .btn-primary { flex: 1; justify-content: center; }
-    }
   </style>
 </head>
+
 <body>
-<div class="shell">
+<div class="app">
 
-  <!-- HEADER -->
-  <div class="card header">
-    <div class="brand">
-      <div class="brand-dot" id="brandDot"></div>
-      <span class="brand-title">Brainwave</span>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Chrysasynth</div>
+      <div class="product-title">Brainwave</div>
     </div>
-    <div class="header-meta">
-      <span class="meta-chip active-chip" id="stateChip">Alpha · 10 Hz</span>
-      <span class="meta-chip" id="timerChip">∞</span>
+    <div class="status-stack">
+      <span class="status-pill primary" id="stateChip">Alpha · 10 Hz</span>
+      <span class="status-pill" id="timerChip">∞</span>
     </div>
-  </div>
+  </header>
 
-  <!-- WAVEFORM -->
-  <div class="card vis-card">
+  <section class="visual-stage">
     <canvas id="wave" aria-label="Waveform visualizer"></canvas>
-    <div class="vis-footer">
-      <span class="vis-hint">🎧 Use headphones</span>
-      <span class="vis-hz" id="metaHz">200 Hz · +10.0 Hz</span>
+    <div class="visual-overlay">
+      <span class="micro-pill">Headphones recommended</span>
+      <span class="micro-pill hz" id="metaHz">200 Hz · +10.0 Hz</span>
     </div>
-  </div>
+  </section>
 
-  <!-- BANDS + CONTROLS -->
-  <div class="card">
+  <section class="band-block">
+    <div class="section-label">Brainwave band</div>
+    <div class="bands-row" id="bandsRow"></div>
+  </section>
 
-    <div class="bands-section">
-      <div class="section-label">Brainwave Band</div>
-      <div class="chips-row" id="bandsRow"></div>
-    </div>
-
-    <div style="height:1px;background:var(--stroke);margin:0 16px"></div>
-
-    <div class="controls-section">
-
-      <!-- Carrier -->
-      <div class="control-group">
-        <div class="control-header">
-          <span class="control-label">Carrier Frequency</span>
-          <span class="control-value"><span id="carrierV">200</span> Hz</span>
-        </div>
-        <div class="slider-wrap">
-          <div class="slider-track"></div>
-          <div class="slider-fill" id="carrierFill"></div>
-          <input type="range" id="carrier" min="100" max="400" step="1" value="200"/>
-        </div>
+  <section class="controls">
+    <div class="control">
+      <div class="control-head">
+        <span class="control-name">Carrier</span>
+        <span class="control-value"><span id="carrierV">200</span> Hz</span>
       </div>
-
-      <!-- Beat -->
-      <div class="control-group">
-        <div class="control-header">
-          <span class="control-label">Beat Frequency</span>
-          <span class="control-value"><span id="beatV">10.0</span> Hz</span>
-        </div>
-        <div class="slider-wrap">
-          <div class="slider-track"></div>
-          <div class="slider-fill" id="beatFill"></div>
-          <input type="range" id="beat" min="0.5" max="40" step="0.1" value="10"/>
-        </div>
+      <div class="slider-wrap">
+        <div class="slider-track"></div>
+        <div class="slider-fill" id="carrierFill"></div>
+        <input type="range" id="carrier" min="100" max="400" step="1" value="200"/>
       </div>
-
-      <!-- Volume -->
-      <div class="control-group">
-        <div class="control-header">
-          <span class="control-label">Volume</span>
-          <span class="control-value" id="volV">70%</span>
-        </div>
-        <div class="slider-wrap">
-          <div class="slider-track"></div>
-          <div class="slider-fill" id="volFill"></div>
-          <input type="range" id="vol" min="0" max="1" step="0.01" value="0.7"/>
-        </div>
-      </div>
-
-      <!-- Timer -->
-      <div class="control-group">
-        <div class="control-header">
-          <span class="control-label">Session Timer</span>
-        </div>
-        <div class="timer-chips" id="timerChips">
-          <div class="t-chip active" data-val="0">∞</div>
-          <div class="t-chip" data-val="300000">5 min</div>
-          <div class="t-chip" data-val="600000">10 min</div>
-          <div class="t-chip" data-val="1200000">20 min</div>
-          <div class="t-chip" data-val="3600000">60 min</div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- ACTIONS -->
-    <div class="actions">
-      <button class="btn btn-primary" id="startBtn">▶ Start</button>
-      <button class="btn" id="stopBtn">■ Stop</button>
-      <button class="btn btn-ghost" id="fsBtn">⛶ Fullscreen</button>
+    <div class="control">
+      <div class="control-head">
+        <span class="control-name">Beat</span>
+        <span class="control-value"><span id="beatV">10.0</span> Hz</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track"></div>
+        <div class="slider-fill" id="beatFill"></div>
+        <input type="range" id="beat" min="0.5" max="40" step="0.1" value="10"/>
+      </div>
     </div>
 
-  </div>
+    <div class="control">
+      <div class="control-head">
+        <span class="control-name">Volume</span>
+        <span class="control-value" id="volV">70%</span>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-track"></div>
+        <div class="slider-fill" id="volFill"></div>
+        <input type="range" id="vol" min="0" max="1" step="0.01" value="0.7"/>
+      </div>
+    </div>
 
+    <div class="timer-block">
+      <div class="section-label">Session timer</div>
+      <div class="timer-row" id="timerChips">
+        <div class="t-chip active" data-val="0">∞</div>
+        <div class="t-chip" data-val="300000">5 min</div>
+        <div class="t-chip" data-val="600000">10 min</div>
+        <div class="t-chip" data-val="1200000">20 min</div>
+        <div class="t-chip" data-val="3600000">60 min</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="actions">
+    <button class="btn primary" id="startBtn">Start</button>
+    <button class="btn" id="stopBtn">Stop</button>
+  </section>
+<div id="brandDot" style="display:none"></div>
 </div>
 
 <script>
+
 // ── BAND DATA ──────────────────────────────────────────────────────────────
 const BANDS = [
-  { id:"delta", name:"Delta", hz:2,  desc:"Deep sleep",  c1:"#B5C2D9", c2:"#7A8FAD", glow:"rgba(181,194,217,0.18)" },
-  { id:"theta", name:"Theta", hz:6,  desc:"Meditation",  c1:"#86E89C", c2:"#2DBB85", glow:"rgba(134,232,156,0.20)" },
-  { id:"alpha", name:"Alpha", hz:10, desc:"Relaxation",  c1:"#78F0FF", c2:"#C38CFF", glow:"rgba(120,240,255,0.22)" },
-  { id:"beta",  name:"Beta",  hz:20, desc:"Focus",       c1:"#FFB347", c2:"#FF7C7C", glow:"rgba(255,179,71,0.20)"  },
-  { id:"gamma", name:"Gamma", hz:35, desc:"Peak state",  c1:"#66E1FF", c2:"#6C8EFF", glow:"rgba(102,225,255,0.22)" },
+  { id:"delta", name:"Delta", hz:2,  desc:"Deep sleep", c1:"#6688FF", c2:"#6F5CFF", glow:"rgba(102,136,255,0.20)" },
+  { id:"theta", name:"Theta", hz:6,  desc:"Meditation", c1:"#7A72FF", c2:"#875CFF", glow:"rgba(122,114,255,0.20)" },
+  { id:"alpha", name:"Alpha", hz:10, desc:"Relaxation", c1:"#54D9FF", c2:"#8B5CFF", glow:"rgba(84,217,255,0.20)" },
+  { id:"beta",  name:"Beta",  hz:20, desc:"Focus",      c1:"#8B7CFF", c2:"#B35CFF", glow:"rgba(139,124,255,0.20)" },
+  { id:"gamma", name:"Gamma", hz:35, desc:"Peak state", c1:"#B76CFF", c2:"#D05CFF", glow:"rgba(183,108,255,0.20)" },
 ];
 
 const rs = document.documentElement.style;
 let currentBand = BANDS[2]; // alpha default
 let timerVal = 0;
 let stopTimerID = null;
+let countdownID = null;
+let timerEndsAt = 0;
+
+function formatRemaining(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+}
+
+function stopCountdown() {
+  if (countdownID !== null) {
+    clearInterval(countdownID);
+    countdownID = null;
+  }
+  timerEndsAt = 0;
+}
+
+function startCountdown() {
+  stopCountdown();
+
+  if (timerVal <= 0) {
+    timerChip.textContent = "∞";
+    return;
+  }
+
+  timerEndsAt = Date.now() + timerVal;
+
+  const updateCountdown = () => {
+    const remaining = timerEndsAt - Date.now();
+    timerChip.textContent = formatRemaining(remaining);
+
+    if (remaining <= 0) {
+      stopCountdown();
+    }
+  };
+
+  updateCountdown();
+  countdownID = setInterval(updateCountdown, 250);
+}
 
 // ── DOM ────────────────────────────────────────────────────────────────────
 const brandDot   = document.getElementById("brandDot");
@@ -680,12 +571,13 @@ async function startAudio() {
   clearTimeout(stopTimerID);
   fadeTo(master, targetVol, 0.14);
   brandDot.classList.add("playing");
-  startBtn.textContent = "▶ Playing";
+  startBtn.textContent = "Playing";
 
   if (timerVal > 0) {
-    timerChip.textContent = `${Math.round(timerVal / 60000)} min`;
+    startCountdown();
     stopTimerID = setTimeout(stopAudio, timerVal);
   } else {
+    stopCountdown();
     timerChip.textContent = "∞";
   }
   animate();
@@ -695,12 +587,13 @@ async function stopAudio() {
   if (!actx) return;
   fadeTo(master, 0, 0.14);
   brandDot.classList.remove("playing");
-  startBtn.textContent = "▶ Start";
+  startBtn.textContent = "Start";
   setTimeout(async () => {
     await actx.suspend();
     cancelAnimationFrame(rafId); rafId = null;
     clearTimeout(stopTimerID);
-    timerChip.textContent = "∞";
+    stopCountdown();
+    timerChip.textContent = timerVal > 0 ? `${Math.round(timerVal / 60000)} min` : "∞";
     drawWave(true);
   }, 160);
 }
@@ -717,8 +610,8 @@ function drawWave(clearOnly = false) {
 
   // bg
   const bg = ctx2d.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, "rgba(16,14,26,0.95)");
-  bg.addColorStop(1, "rgba(10,8,18,0.98)");
+  bg.addColorStop(0, "rgba(16,19,24,0.70)");
+  bg.addColorStop(1, "rgba(9,10,13,0.82)");
   ctx2d.fillStyle = bg;
   ctx2d.fillRect(0, 0, W, H);
 
@@ -811,14 +704,15 @@ function applyBandTheme(band) {
 // ── BUILD BANDS ────────────────────────────────────────────────────────────
 BANDS.forEach(band => {
   const chip = document.createElement("div");
-  chip.className = "chip" + (band.id === "alpha" ? " active" : "");
+  chip.className = "band-chip" + (band.id === "alpha" ? " active" : "");
+  chip.style.setProperty("--dot-color", band.c1);
   chip.innerHTML = `
-    <span class="chip-dot" style="background:${band.c1}"></span>
-    <span>${band.name}</span>
-    <span class="chip-hz">${band.hz} Hz</span>
+    <span class="dot"></span>
+    <span class="name">${band.name}</span>
+    <span class="hz">${band.hz} Hz</span>
   `;
   chip.addEventListener("click", () => {
-    document.querySelectorAll("#bandsRow .chip").forEach(c => c.classList.remove("active"));
+    document.querySelectorAll("#bandsRow .band-chip").forEach(c => c.classList.remove("active"));
     chip.classList.add("active");
     beatEl.value = band.hz;
     updateFrequencies();
@@ -834,7 +728,20 @@ document.querySelectorAll(".t-chip").forEach(tc => {
     document.querySelectorAll(".t-chip").forEach(c => c.classList.remove("active"));
     tc.classList.add("active");
     timerVal = parseInt(tc.dataset.val, 10);
-    timerChip.textContent = timerVal > 0 ? `${Math.round(timerVal / 60000)} min` : "∞";
+
+    if (actx && actx.state === "running") {
+      clearTimeout(stopTimerID);
+
+      if (timerVal > 0) {
+        startCountdown();
+        stopTimerID = setTimeout(stopAudio, timerVal);
+      } else {
+        stopCountdown();
+        timerChip.textContent = "∞";
+      }
+    } else {
+      timerChip.textContent = timerVal > 0 ? `${Math.round(timerVal / 60000)} min` : "∞";
+    }
   });
 });
 
@@ -851,11 +758,13 @@ volEl.addEventListener("input", () => {
 // ── ACTIONS ────────────────────────────────────────────────────────────────
 startBtn.addEventListener("click", startAudio);
 stopBtn.addEventListener("click",  stopAudio);
-fsBtn.addEventListener("click", () => {
-  const el = document.documentElement;
-  const go = el.requestFullscreen || el.webkitRequestFullscreen;
-  if (go) go.call(el);
-});
+if (fsBtn) {
+  fsBtn.addEventListener("click", () => {
+    const el = document.documentElement;
+    const go = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (go) go.call(el);
+  });
+}
 
 // ── INIT ───────────────────────────────────────────────────────────────────
 applyBandTheme(BANDS[2]);
@@ -875,7 +784,10 @@ function reportH() {
 window.addEventListener("load", reportH);
 if (window.ResizeObserver) new ResizeObserver(reportH).observe(document.documentElement);
 else window.addEventListener("resize", reportH);
+
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("./brainwave-sw.js");</script>
+<script>
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./brainwave-sw.js");
+</script>
 </body>
 </html>
